@@ -36,8 +36,10 @@ class AssistantStream:
                 if (raw_tool_calls and len(raw_tool_calls) > 0)
                 else None
             )
+            if tool_calls is not None and len(tool_calls) == 0:
+                tool_calls = None
             return AssistantMessage(
-                result_content if result_content else "", tool_calls
+                result_content if result_content else "", tool_calls=tool_calls
             )
         except StopAsyncIteration:
             raise StopAsyncIteration
@@ -149,9 +151,11 @@ class AsyncCompletion:
         parsed_tools = replace_pydantic_objects_in_tools(tools)
 
         async def wrapper(messages: list[AnyMessage]) -> AssistantMessage:
+            messages_dicts = [m.__dict__ for m in messages]
+            print(messages_dicts)
             result = await acompletion(
                 model=model,
-                messages=messages,
+                messages=messages_dicts,
                 # timeout=timeout,
                 temperature=temperature,
                 top_p=top_p,
@@ -226,9 +230,10 @@ class AsyncStream:
         parsed_tools = replace_pydantic_objects_in_tools(tools)
 
         async def wrapper(messages: list[AnyMessage]) -> AssistantStream:
+            messages_dicts = [m.__dict__ for m in messages]
             result = await acompletion(
                 model=model,
-                messages=messages,
+                messages=messages_dicts,
                 # timeout=timeout,
                 temperature=temperature,
                 top_p=top_p,

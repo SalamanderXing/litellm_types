@@ -29,24 +29,24 @@ class FunctionMessage(BaseModel):
     name: str
     role: Literal["function"] = "function"
 
-    def __init__(self, content: str, name: str):
-        super().__init__(content=content, name=name, role="function")
+    def __init__(self, content: str, name: str, role="function"):
+        super().__init__(content=content, name=name, role=role)
 
 
 class UserMessage(BaseModel):
     content: str
     role: Literal["user"] = "user"
 
-    def __init__(self, content: str):
-        super().__init__(content=content, role="user")
+    def __init__(self, content: str, role="user"):
+        super().__init__(content=content, role=role)
 
 
 class SystemMessage(BaseModel):
     content: str
     role: Literal["system"] = "system"
 
-    def __init__(self, content: str):
-        super().__init__(content=content, role="system")
+    def __init__(self, content: str, role="system"):
+        super().__init__(content=content, role=role)
 
 
 class ToolCall(BaseModel):
@@ -55,8 +55,8 @@ class ToolCall(BaseModel):
     type: str
 
     @beartype
-    def __init__(self, id: str, function: Function):
-        super().__init__(id=id, function=function, type="function")
+    def __init__(self, id: str, function: Function, type="function"):
+        super().__init__(id=id, function=function, type=type)
 
 
 class ToolCallDelta(BaseModel):
@@ -102,9 +102,14 @@ class AssistantMessage(BaseModel):
     tool_calls: list[ToolCall | ToolCallDelta] | None = None
 
     def __init__(
-        self, content: str, tool_calls: list[ToolCall | ToolCallDelta] | None = None
+        self,
+        content: str,
+        tool_calls: list[ToolCall | ToolCallDelta] | None = None,
+        role="assistant",
     ):
-        super().__init__(content=content, role="assistant", tool_calls=tool_calls)
+        if tool_calls is not None and len(tool_calls) == 0:
+            tool_calls = None
+        super().__init__(content=content, role=role, tool_calls=tool_calls)
 
     def __add__(
         self, other: "AssistantMessage | AssistantMessageDelta"
