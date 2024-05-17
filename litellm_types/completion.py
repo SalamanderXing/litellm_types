@@ -33,7 +33,7 @@ class AssistantStream:
                     ToolCallDelta(id=raw_tool_call.id, function=raw_tool_call.function)
                     for raw_tool_call in raw_tool_calls
                 ]
-                if raw_tool_calls
+                if (raw_tool_calls and len(raw_tool_calls) > 0)
                 else None
             )
             return AssistantMessage(
@@ -326,6 +326,6 @@ def get_acompletion_from_openai(
             **kwargs,
         )
         result = result.choices[0].message.content
-        return AssistantMessage(result)
+        return AssistantMessage(content=result)
 
     return wrapper
