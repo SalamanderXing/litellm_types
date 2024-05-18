@@ -73,10 +73,14 @@ def add_tool_calls(
         for k in a.function.__dict__
     }
     fn = Function(**res_fn)  # type: ignore
+    fn.type = "function"
+    tool_type = best_of_both(a.type, b.type)
+    if tool_type is None:
+        tool_type = "function"
     return ToolCallDelta(
         id=best_of_both(a.id, b.id),
         function=fn,
-        type=best_of_both(a.type, b.type),
+        type=tool_type,
     )
 
 
@@ -139,9 +143,13 @@ class AssistantMessage(BaseModel):
 
 
 class ToolMessage(BaseModel):
+    role: Literal["tool"] = "tool"
+    content: str
+    tool_call_id: str
+
     @beartype
-    def __init__(self, content: str, tool_call_id: str):
-        super().__init__(content=content, role="tool", tool_call_id=tool_call_id)
+    def __init__(self, content: str, tool_call_id: str, role="tool"):
+        super().__init__(content=content, role=role, tool_call_id=tool_call_id)
 
 
 AnyMessage = UserMessage | AssistantMessage | SystemMessage | FunctionMessage
